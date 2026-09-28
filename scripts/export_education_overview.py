@@ -180,6 +180,12 @@ EXAM_HEADERS = [
     "Students Tested", "Students Tested % Change",
 ]
 
+# Indices into an EXAM_HEADERS row for the 4 proficiency-band percentages,
+# used to build a chart-friendly sheet with just Subject + percentages
+# (no year/point-change/count columns to confuse a first bar chart).
+CHART_HEADERS = ["Subject", "Advanced %", "Proficient %", "Basic %", "Below Basic %"]
+CHART_COL_IDX = [0, 3, 5, 7, 9]
+
 
 # ─── Enrollment overview ──────────────────────────────────────────────────────
 
@@ -333,9 +339,17 @@ def main():
         header_row = [title] + list(headers[1:])
         return [header_row] + rows
 
+    def build_chart_sheet(title, rows):
+        """Slim Subject + 4 percentages sheet — a clean shape for a first bar chart."""
+        header_row = [title] + CHART_HEADERS[1:]
+        chart_rows = [[row[i] for i in CHART_COL_IDX] for row in rows]
+        return [header_row] + chart_rows
+
     sheets = [
-        build_sheet("PSSA Statewide", EXAM_HEADERS, pssa_rows),
-        build_sheet("Keystone Statewide", EXAM_HEADERS, keystone_rows),
+        build_chart_sheet("PSSA Statewide", pssa_rows),
+        build_chart_sheet("Keystone Statewide", keystone_rows),
+        build_sheet("PSSA Statewide Detail", EXAM_HEADERS, pssa_rows),
+        build_sheet("Keystone Statewide Detail", EXAM_HEADERS, keystone_rows),
         build_sheet("Enrollment Overview", ENROLLMENT_HEADERS, enrollment_rows),
         build_sheet("Adequacy Payments Overview", ADEQUACY_HEADERS, adequacy_rows),
     ]
