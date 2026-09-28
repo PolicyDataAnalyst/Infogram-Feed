@@ -33,6 +33,7 @@ REPO_ROOT = SCRIPT_DIR.parent
 PSSA_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "pssa_breakdown.json"
 KEYSTONE_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "keystone_breakdown.json"
 ENROLLMENT_OUTPUT_PATH = REPO_ROOT / "enrollment.json"
+ENROLLMENT_TREND_OUTPUT_PATH = REPO_ROOT / "enrollment_trend.json"
 ADEQUACY_OUTPUT_PATH = REPO_ROOT / "adequacy.json"
 
 PSSA_KEYSTONE_YEARS = [2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025]
@@ -263,6 +264,24 @@ def enrollment_overview_rows(cur):
 ENROLLMENT_HEADERS = ["Metric", "Value", "Detail"]
 
 
+def enrollment_trend_rows(cur, start_year=2018):
+    rows = []
+    year = start_year
+    while True:
+        table = f"silver_pde_{year}_enrollment_lea"
+        if not table_exists(cur, table):
+            break
+        cur.execute(f"SELECT SUM(CAST(total AS INTEGER)) FROM {table}")
+        total = cur.fetchone()[0]
+        if total:
+            rows.append([str(year), total])
+        year += 1
+    return rows
+
+
+ENROLLMENT_TREND_HEADERS = ["Year", "Statewide Enrollment"]
+
+
 # ─── Adequacy (Ready-to-Learn) overview ───────────────────────────────────────
 
 def adequacy_overview_rows(cur):
@@ -327,6 +346,7 @@ def main():
     pssa_rows, pssa_cur_yr, pssa_prev_yr = statewide_exam_rows(cur, "pssa")
     keystone_rows, key_cur_yr, key_prev_yr = statewide_exam_rows(cur, "keystone")
     enrollment_rows, enroll_yr = enrollment_overview_rows(cur)
+    enrollment_trend = enrollment_trend_rows(cur)
     adequacy_rows = adequacy_overview_rows(cur)
 
     conn.close()
@@ -364,6 +384,9 @@ def main():
     enrollment_sheets = [
         build_sheet("Enrollment Overview", ENROLLMENT_HEADERS, enrollment_rows),
     ]
+    enrollment_trend_sheets = [
+        build_sheet("Statewide Enrollment", ENROLLMENT_TREND_HEADERS, enrollment_trend),
+    ]
     adequacy_sheets = [
         build_sheet("Adequacy Payments Overview", ADEQUACY_HEADERS, adequacy_rows),
     ]
@@ -372,6 +395,7 @@ def main():
         (PSSA_BREAKDOWN_OUTPUT_PATH, pssa_breakdown_sheets),
         (KEYSTONE_BREAKDOWN_OUTPUT_PATH, keystone_breakdown_sheets),
         (ENROLLMENT_OUTPUT_PATH, enrollment_sheets),
+        (ENROLLMENT_TREND_OUTPUT_PATH, enrollment_trend_sheets),
         (ADEQUACY_OUTPUT_PATH, adequacy_sheets),
     ]
 
