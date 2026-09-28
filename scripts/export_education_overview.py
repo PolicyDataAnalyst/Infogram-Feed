@@ -9,10 +9,10 @@ headline row per subject.
 
 Produces 4 output files (each with its own sheets, for its own Infogram
 Live Data source link):
-  - pssa.json       - PSSA Statewide, per-subject breakdowns, detail
-  - keystone.json   - Keystone Statewide, per-subject breakdowns, detail
-  - enrollment.json - Enrollment Overview
-  - adequacy.json   - Adequacy Payments Overview
+  - pssa_breakdown.json     - one sheet per PSSA subject: category rows
+  - keystone_breakdown.json - one sheet per Keystone subject: category rows
+  - enrollment.json         - Enrollment Overview
+  - adequacy.json           - Adequacy Payments Overview
 
 Run directly: py export_education_overview.py
 """
@@ -25,14 +25,13 @@ DB_PATH = r"C:\Users\JacobNCuster\database_project\data\warehouse\silver.db"
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 
-# Infogram turns every sheet in one JSON file into a TAB of the same chart.
-# Sheets with different shapes (subjects-as-rows vs. categories-as-rows) must
-# not share a file, or switching tabs flips what a wedge/bar represents
-# part-way through. So each file below holds only same-shaped sheets.
-PSSA_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "pssa_breakdown.json"      # rows = categories, one sheet per subject
-PSSA_COMPARE_OUTPUT_PATH = REPO_ROOT / "pssa_compare.json"          # rows = subjects
+# Infogram turns every sheet in one JSON file into a TAB of the same chart,
+# so each file below holds only same-shaped sheets (rows = categories, one
+# sheet per subject) — trimmed to just what's actually in use. A
+# subject-comparison or full-detail file can be added back later if a chart
+# needs subjects-as-rows instead.
+PSSA_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "pssa_breakdown.json"
 KEYSTONE_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "keystone_breakdown.json"
-KEYSTONE_COMPARE_OUTPUT_PATH = REPO_ROOT / "keystone_compare.json"
 ENROLLMENT_OUTPUT_PATH = REPO_ROOT / "enrollment.json"
 ADEQUACY_OUTPUT_PATH = REPO_ROOT / "adequacy.json"
 
@@ -184,18 +183,10 @@ def statewide_exam_rows(cur, exam):
     return rows, cur_yr, prev_yr
 
 
-EXAM_HEADERS = [
-    "Subject", "Year", "Prior Year", "Advanced %", "Advanced Point Change",
-    "Proficient %", "Proficient Point Change",
-    "Basic %", "Basic Point Change",
-    "Below Basic %", "Below Basic Point Change",
-    "Students Tested", "Students Tested % Change",
-]
-
-# Indices into an EXAM_HEADERS row for the 4 proficiency-band percentages,
-# used to build a chart-friendly sheet with just Subject + percentages
-# (no year/point-change/count columns to confuse a first bar chart).
-CHART_HEADERS = ["Subject", "Advanced %", "Proficient %", "Basic %", "Below Basic %"]
+# Each row from statewide_exam_rows() is:
+#   [subject, year, prior_year, adv, adv_chg, prof, prof_chg,
+#    basic, basic_chg, bb, bb_chg, students_tested, students_tested_chg]
+# These indices pull out just Subject + the 4 proficiency-band percentages.
 CHART_COL_IDX = [0, 3, 5, 7, 9]
 
 
@@ -345,18 +336,10 @@ def main():
     # cells. There is no "title" key — the tab/sheet name is just the top-left
     # cell of that sheet's header row. Sheet names are kept stable (no year
     # embedded) so charts built in Infogram stay bound to the same tab across
-    # future refreshes; the year itself travels inside each sheet's rows
-    # instead (see EXAM_HEADERS and the "Detail" column of the overview sheets).
+    # future refreshes.
     def build_sheet(title, headers, rows):
         header_row = [title] + list(headers[1:])
         return [header_row] + rows
-
-    def build_chart_sheet(title, rows):
-        """Slim Subject + 4 percentages sheet — good for comparing subjects
-        side-by-side on ONE proficiency band (e.g. Advanced % across subjects)."""
-        header_row = [title] + CHART_HEADERS[1:]
-        chart_rows = [[row[i] for i in CHART_COL_IDX] for row in rows]
-        return [header_row] + chart_rows
 
     def build_breakdown_sheets(exam_label, rows):
         """One sheet per subject, transposed: Category (Advanced/Proficient/
@@ -377,15 +360,7 @@ def main():
 
     # Same-shaped sheets only per file — see the note above PSSA_BREAKDOWN_OUTPUT_PATH.
     pssa_breakdown_sheets = build_breakdown_sheets("PSSA", pssa_rows)          # rows = categories
-    pssa_compare_sheets = [                                                    # rows = subjects
-        build_chart_sheet("PSSA Statewide", pssa_rows),
-        build_sheet("PSSA Statewide Detail", EXAM_HEADERS, pssa_rows),
-    ]
     keystone_breakdown_sheets = build_breakdown_sheets("Keystone", keystone_rows)
-    keystone_compare_sheets = [
-        build_chart_sheet("Keystone Statewide", keystone_rows),
-        build_sheet("Keystone Statewide Detail", EXAM_HEADERS, keystone_rows),
-    ]
     enrollment_sheets = [
         build_sheet("Enrollment Overview", ENROLLMENT_HEADERS, enrollment_rows),
     ]
@@ -395,9 +370,7 @@ def main():
 
     outputs = [
         (PSSA_BREAKDOWN_OUTPUT_PATH, pssa_breakdown_sheets),
-        (PSSA_COMPARE_OUTPUT_PATH, pssa_compare_sheets),
         (KEYSTONE_BREAKDOWN_OUTPUT_PATH, keystone_breakdown_sheets),
-        (KEYSTONE_COMPARE_OUTPUT_PATH, keystone_compare_sheets),
         (ENROLLMENT_OUTPUT_PATH, enrollment_sheets),
         (ADEQUACY_OUTPUT_PATH, adequacy_sheets),
     ]
