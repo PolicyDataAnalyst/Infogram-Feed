@@ -24,8 +24,15 @@ from pathlib import Path
 DB_PATH = r"C:\Users\JacobNCuster\database_project\data\warehouse\silver.db"
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-PSSA_OUTPUT_PATH = REPO_ROOT / "pssa.json"
-KEYSTONE_OUTPUT_PATH = REPO_ROOT / "keystone.json"
+
+# Infogram turns every sheet in one JSON file into a TAB of the same chart.
+# Sheets with different shapes (subjects-as-rows vs. categories-as-rows) must
+# not share a file, or switching tabs flips what a wedge/bar represents
+# part-way through. So each file below holds only same-shaped sheets.
+PSSA_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "pssa_breakdown.json"      # rows = categories, one sheet per subject
+PSSA_COMPARE_OUTPUT_PATH = REPO_ROOT / "pssa_compare.json"          # rows = subjects
+KEYSTONE_BREAKDOWN_OUTPUT_PATH = REPO_ROOT / "keystone_breakdown.json"
+KEYSTONE_COMPARE_OUTPUT_PATH = REPO_ROOT / "keystone_compare.json"
 ENROLLMENT_OUTPUT_PATH = REPO_ROOT / "enrollment.json"
 ADEQUACY_OUTPUT_PATH = REPO_ROOT / "adequacy.json"
 
@@ -368,14 +375,15 @@ def main():
             ])
         return sheets
 
-    pssa_sheets = [
+    # Same-shaped sheets only per file — see the note above PSSA_BREAKDOWN_OUTPUT_PATH.
+    pssa_breakdown_sheets = build_breakdown_sheets("PSSA", pssa_rows)          # rows = categories
+    pssa_compare_sheets = [                                                    # rows = subjects
         build_chart_sheet("PSSA Statewide", pssa_rows),
-        *build_breakdown_sheets("PSSA", pssa_rows),
         build_sheet("PSSA Statewide Detail", EXAM_HEADERS, pssa_rows),
     ]
-    keystone_sheets = [
+    keystone_breakdown_sheets = build_breakdown_sheets("Keystone", keystone_rows)
+    keystone_compare_sheets = [
         build_chart_sheet("Keystone Statewide", keystone_rows),
-        *build_breakdown_sheets("Keystone", keystone_rows),
         build_sheet("Keystone Statewide Detail", EXAM_HEADERS, keystone_rows),
     ]
     enrollment_sheets = [
@@ -386,8 +394,10 @@ def main():
     ]
 
     outputs = [
-        (PSSA_OUTPUT_PATH, pssa_sheets),
-        (KEYSTONE_OUTPUT_PATH, keystone_sheets),
+        (PSSA_BREAKDOWN_OUTPUT_PATH, pssa_breakdown_sheets),
+        (PSSA_COMPARE_OUTPUT_PATH, pssa_compare_sheets),
+        (KEYSTONE_BREAKDOWN_OUTPUT_PATH, keystone_breakdown_sheets),
+        (KEYSTONE_COMPARE_OUTPUT_PATH, keystone_compare_sheets),
         (ENROLLMENT_OUTPUT_PATH, enrollment_sheets),
         (ADEQUACY_OUTPUT_PATH, adequacy_sheets),
     ]
