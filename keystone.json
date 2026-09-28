@@ -1,0 +1,160 @@
+[
+  [
+    [
+      "Keystone Statewide",
+      "Advanced %",
+      "Proficient %",
+      "Basic %",
+      "Below Basic %"
+    ],
+    [
+      "Algebra I",
+      13.6,
+      27.9,
+      38.6,
+      19.9
+    ],
+    [
+      "Biology",
+      16.2,
+      30.1,
+      29.1,
+      24.6
+    ],
+    [
+      "Literature",
+      9.7,
+      49.7,
+      26.1,
+      14.5
+    ]
+  ],
+  [
+    [
+      "Keystone Algebra I",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      13.6
+    ],
+    [
+      "Proficient",
+      27.9
+    ],
+    [
+      "Basic",
+      38.6
+    ],
+    [
+      "Below Basic",
+      19.9
+    ]
+  ],
+  [
+    [
+      "Keystone Biology",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      16.2
+    ],
+    [
+      "Proficient",
+      30.1
+    ],
+    [
+      "Basic",
+      29.1
+    ],
+    [
+      "Below Basic",
+      24.6
+    ]
+  ],
+  [
+    [
+      "Keystone Literature",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      9.7
+    ],
+    [
+      "Proficient",
+      49.7
+    ],
+    [
+      "Basic",
+      26.1
+    ],
+    [
+      "Below Basic",
+      14.5
+    ]
+  ],
+  [
+    [
+      "Keystone Statewide Detail",
+      "Year",
+      "Prior Year",
+      "Advanced %",
+      "Advanced Point Change",
+      "Proficient %",
+      "Proficient Point Change",
+      "Basic %",
+      "Basic Point Change",
+      "Below Basic %",
+      "Below Basic Point Change",
+      "Students Tested",
+      "Students Tested % Change"
+    ],
+    [
+      "Algebra I",
+      "2025",
+      "2024",
+      13.6,
+      2.8,
+      27.9,
+      -0.5,
+      38.6,
+      -1.7,
+      19.9,
+      -0.6,
+      117763,
+      8.0
+    ],
+    [
+      "Biology",
+      "2025",
+      "2024",
+      16.2,
+      -0.9,
+      30.1,
+      0.4,
+      29.1,
+      0.1,
+      24.6,
+      0.3,
+      117464,
+      1.1
+    ],
+    [
+      "Literature",
+      "2025",
+      "2024",
+      9.7,
+      1.2,
+      49.7,
+      -2.2,
+      26.1,
+      -0.5,
+      14.5,
+      1.4,
+      116896,
+      0.7
+    ]
+  ]
+]

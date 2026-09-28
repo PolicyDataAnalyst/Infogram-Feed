@@ -1,17 +1,18 @@
 """
-Exports PA education data from silver.db into a JSON file formatted for
-Infogram's Live Data feature.
+Exports PA education data from silver.db into separate JSON files, one per
+dashboard section, formatted for Infogram's Live Data feature.
 
 Mirrors the "Overview" page of the education_dashboard Java app
 (IdeaProjects/Test, com.education.EducationDataService), but replaces the
 PSSA/Keystone grade-by-grade/group breakdown tables with a single statewide
 headline row per subject.
 
-Produces 4 sheets:
-  1. PSSA Statewide       - one row per subject, most recent year vs prior
-  2. Keystone Statewide   - same shape, Keystone exam
-  3. Enrollment Overview  - statewide enrollment summary stats
-  4. Adequacy Payments Overview - Ready-to-Learn funding summary stats
+Produces 4 output files (each with its own sheets, for its own Infogram
+Live Data source link):
+  - pssa.json       - PSSA Statewide, per-subject breakdowns, detail
+  - keystone.json   - Keystone Statewide, per-subject breakdowns, detail
+  - enrollment.json - Enrollment Overview
+  - adequacy.json   - Adequacy Payments Overview
 
 Run directly: py export_education_overview.py
 """
@@ -22,7 +23,11 @@ from pathlib import Path
 
 DB_PATH = r"C:\Users\JacobNCuster\database_project\data\warehouse\silver.db"
 SCRIPT_DIR = Path(__file__).resolve().parent
-OUTPUT_PATH = SCRIPT_DIR.parent / "education_overview.json"
+REPO_ROOT = SCRIPT_DIR.parent
+PSSA_OUTPUT_PATH = REPO_ROOT / "pssa.json"
+KEYSTONE_OUTPUT_PATH = REPO_ROOT / "keystone.json"
+ENROLLMENT_OUTPUT_PATH = REPO_ROOT / "enrollment.json"
+ADEQUACY_OUTPUT_PATH = REPO_ROOT / "adequacy.json"
 
 PSSA_KEYSTONE_YEARS = [2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025]
 ENROLL_TRY_YEARS = [2026, 2025, 2024, 2023, 2022, 2021]
@@ -363,23 +368,36 @@ def main():
             ])
         return sheets
 
-    sheets = [
+    pssa_sheets = [
         build_chart_sheet("PSSA Statewide", pssa_rows),
-        build_chart_sheet("Keystone Statewide", keystone_rows),
         *build_breakdown_sheets("PSSA", pssa_rows),
-        *build_breakdown_sheets("Keystone", keystone_rows),
         build_sheet("PSSA Statewide Detail", EXAM_HEADERS, pssa_rows),
+    ]
+    keystone_sheets = [
+        build_chart_sheet("Keystone Statewide", keystone_rows),
+        *build_breakdown_sheets("Keystone", keystone_rows),
         build_sheet("Keystone Statewide Detail", EXAM_HEADERS, keystone_rows),
+    ]
+    enrollment_sheets = [
         build_sheet("Enrollment Overview", ENROLLMENT_HEADERS, enrollment_rows),
+    ]
+    adequacy_sheets = [
         build_sheet("Adequacy Payments Overview", ADEQUACY_HEADERS, adequacy_rows),
     ]
 
-    OUTPUT_PATH.write_text(json.dumps(sheets, indent=2), encoding="utf-8")
+    outputs = [
+        (PSSA_OUTPUT_PATH, pssa_sheets),
+        (KEYSTONE_OUTPUT_PATH, keystone_sheets),
+        (ENROLLMENT_OUTPUT_PATH, enrollment_sheets),
+        (ADEQUACY_OUTPUT_PATH, adequacy_sheets),
+    ]
 
     print("Export complete.")
-    print(f"  Output file: {OUTPUT_PATH}")
-    for sheet in sheets:
-        print(f"  - {sheet[0][0]}: {len(sheet) - 1} rows")
+    for path, sheets in outputs:
+        path.write_text(json.dumps(sheets, indent=2), encoding="utf-8")
+        print(f"  Output file: {path}")
+        for sheet in sheets:
+            print(f"    - {sheet[0][0]}: {len(sheet) - 1} rows")
 
 
 if __name__ == "__main__":
