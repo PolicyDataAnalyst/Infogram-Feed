@@ -322,23 +322,30 @@ def main():
 
     conn.close()
 
-    # Sheet names are kept stable (no year in the key) so that charts built in
-    # Infogram stay bound to the same sheet across future refreshes — the year
-    # itself is carried inside each sheet's rows instead (see EXAM_HEADERS and
-    # the "Detail" column of the overview sheets).
-    sheets = {
-        "PSSA Statewide": [EXAM_HEADERS] + pssa_rows,
-        "Keystone Statewide": [EXAM_HEADERS] + keystone_rows,
-        "Enrollment Overview": [ENROLLMENT_HEADERS] + enrollment_rows,
-        "Adequacy Payments Overview": [ADEQUACY_HEADERS] + adequacy_rows,
-    }
+    # Infogram's JSON feed format (see https://infogram.com/api/examples/live_tabs.json)
+    # is a plain array of sheets, each sheet a list of rows, each row a list of
+    # cells. There is no "title" key — the tab/sheet name is just the top-left
+    # cell of that sheet's header row. Sheet names are kept stable (no year
+    # embedded) so charts built in Infogram stay bound to the same tab across
+    # future refreshes; the year itself travels inside each sheet's rows
+    # instead (see EXAM_HEADERS and the "Detail" column of the overview sheets).
+    def build_sheet(title, headers, rows):
+        header_row = [title] + list(headers[1:])
+        return [header_row] + rows
+
+    sheets = [
+        build_sheet("PSSA Statewide", EXAM_HEADERS, pssa_rows),
+        build_sheet("Keystone Statewide", EXAM_HEADERS, keystone_rows),
+        build_sheet("Enrollment Overview", ENROLLMENT_HEADERS, enrollment_rows),
+        build_sheet("Adequacy Payments Overview", ADEQUACY_HEADERS, adequacy_rows),
+    ]
 
     OUTPUT_PATH.write_text(json.dumps(sheets, indent=2), encoding="utf-8")
 
     print("Export complete.")
     print(f"  Output file: {OUTPUT_PATH}")
-    for title, data in sheets.items():
-        print(f"  - {title}: {len(data) - 1} rows")
+    for sheet in sheets:
+        print(f"  - {sheet[0][0]}: {len(sheet) - 1} rows")
 
 
 if __name__ == "__main__":

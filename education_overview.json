@@ -1,7 +1,7 @@
-{
-  "PSSA Statewide": [
+[
+  [
     [
-      "Subject",
+      "PSSA Statewide",
       "Year",
       "Prior Year",
       "Advanced %",
@@ -46,9 +46,9 @@
       1.0
     ]
   ],
-  "Keystone Statewide": [
+  [
     [
-      "Subject",
+      "Keystone Statewide",
       "Year",
       "Prior Year",
       "Advanced %",
@@ -108,9 +108,9 @@
       0.7
     ]
   ],
-  "Enrollment Overview": [
+  [
     [
-      "Metric",
+      "Enrollment Overview",
       "Value",
       "Detail"
     ],
@@ -140,9 +140,9 @@
       "Philadelphia City SD"
     ]
   ],
-  "Adequacy Payments Overview": [
+  [
     [
-      "Metric",
+      "Adequacy Payments Overview",
       "Value ($)",
       "Detail"
     ],
@@ -177,4 +177,4 @@
       "Philadelphia City SD"
     ]
   ]
-}
+]
