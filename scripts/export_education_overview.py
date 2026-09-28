@@ -340,14 +340,34 @@ def main():
         return [header_row] + rows
 
     def build_chart_sheet(title, rows):
-        """Slim Subject + 4 percentages sheet — a clean shape for a first bar chart."""
+        """Slim Subject + 4 percentages sheet — good for comparing subjects
+        side-by-side on ONE proficiency band (e.g. Advanced % across subjects)."""
         header_row = [title] + CHART_HEADERS[1:]
         chart_rows = [[row[i] for i in CHART_COL_IDX] for row in rows]
         return [header_row] + chart_rows
 
+    def build_breakdown_sheets(exam_label, rows):
+        """One sheet per subject, transposed: Category (Advanced/Proficient/
+        Basic/Below Basic) as rows, a single percent column — good for a pie
+        chart or single-subject bar chart showing that subject's breakdown."""
+        sheets = []
+        for row in rows:
+            subject, adv, prof, basic, bb = (row[i] for i in CHART_COL_IDX)
+            title = f"{exam_label} {subject}"
+            sheets.append([
+                [title, "Percent of Students"],
+                ["Advanced", adv],
+                ["Proficient", prof],
+                ["Basic", basic],
+                ["Below Basic", bb],
+            ])
+        return sheets
+
     sheets = [
         build_chart_sheet("PSSA Statewide", pssa_rows),
         build_chart_sheet("Keystone Statewide", keystone_rows),
+        *build_breakdown_sheets("PSSA", pssa_rows),
+        *build_breakdown_sheets("Keystone", keystone_rows),
         build_sheet("PSSA Statewide Detail", EXAM_HEADERS, pssa_rows),
         build_sheet("Keystone Statewide Detail", EXAM_HEADERS, keystone_rows),
         build_sheet("Enrollment Overview", ENROLLMENT_HEADERS, enrollment_rows),

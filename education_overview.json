@@ -54,6 +54,116 @@
   ],
   [
     [
+      "PSSA English Language Arts",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      11.7
+    ],
+    [
+      "Proficient",
+      36.3
+    ],
+    [
+      "Basic",
+      36.4
+    ],
+    [
+      "Below Basic",
+      15.6
+    ]
+  ],
+  [
+    [
+      "PSSA Math",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      17.3
+    ],
+    [
+      "Proficient",
+      26.1
+    ],
+    [
+      "Basic",
+      27.1
+    ],
+    [
+      "Below Basic",
+      29.5
+    ]
+  ],
+  [
+    [
+      "Keystone Algebra I",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      13.6
+    ],
+    [
+      "Proficient",
+      27.9
+    ],
+    [
+      "Basic",
+      38.6
+    ],
+    [
+      "Below Basic",
+      19.9
+    ]
+  ],
+  [
+    [
+      "Keystone Biology",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      16.2
+    ],
+    [
+      "Proficient",
+      30.1
+    ],
+    [
+      "Basic",
+      29.1
+    ],
+    [
+      "Below Basic",
+      24.6
+    ]
+  ],
+  [
+    [
+      "Keystone Literature",
+      "Percent of Students"
+    ],
+    [
+      "Advanced",
+      9.7
+    ],
+    [
+      "Proficient",
+      49.7
+    ],
+    [
+      "Basic",
+      26.1
+    ],
+    [
+      "Below Basic",
+      14.5
+    ]
+  ],
+  [
+    [
       "PSSA Statewide Detail",
       "Year",
       "Prior Year",
