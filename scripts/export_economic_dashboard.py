@@ -6,11 +6,11 @@ Mirrors the PA Economic Dashboard artifact's data source
 (IdeaProjects/Test/dashboard_refresh/build_dashboard.py) — same 9 BLS LAUS
 series, monthly, since 2019.
 
-Produces 4 output files:
-  - labor_market_trend.json      - all 9 series, one row per month, since 2019
-  - employment_rate.json         - PA Employment-Population Ratio, last 5 years
-  - unemployment_rate.json       - PA Unemployment Rate, last 5 years
-  - labor_participation_rate.json - PA Labor Force Participation Rate, last 5 years
+Produces 4 output files, all starting 2019-01:
+  - labor_market_trend.json      - all 9 series, one row per month
+  - employment_rate.json         - PA Employment-Population Ratio
+  - unemployment_rate.json       - PA Unemployment Rate
+  - labor_participation_rate.json - PA Labor Force Participation Rate
 
 Run directly: py export_economic_dashboard.py
 """
@@ -27,7 +27,7 @@ EMPLOYMENT_RATE_OUTPUT_PATH = REPO_ROOT / "employment_rate.json"
 UNEMPLOYMENT_RATE_OUTPUT_PATH = REPO_ROOT / "unemployment_rate.json"
 LABOR_PARTICIPATION_RATE_OUTPUT_PATH = REPO_ROOT / "labor_participation_rate.json"
 
-RATE_TREND_MONTHS = 60  # trailing 5 years of monthly data
+RATE_TREND_START_DATE = "2019-01"
 
 # "Employment rate" conventionally means the Employment-Population Ratio (the
 # BLS/labordata.db series names for PA's unemployment rate, participation
@@ -54,9 +54,12 @@ SERIES = [
 ]
 
 
-def last_n_months_sheet(cur, series_id, title, value_label, months=RATE_TREND_MONTHS):
-    cur.execute("SELECT date, value FROM series_data WHERE series_id = ? ORDER BY date", (series_id,))
-    rows = cur.fetchall()[-months:]
+def rate_trend_sheet(cur, series_id, title, value_label, start_date=RATE_TREND_START_DATE):
+    cur.execute(
+        "SELECT date, value FROM series_data WHERE series_id = ? AND date >= ? ORDER BY date",
+        (series_id, start_date),
+    )
+    rows = cur.fetchall()
     header_row = [title, value_label]
     data_rows = [[date, round(value, 1) if value is not None else None] for date, value in rows]
     return [header_row] + data_rows
@@ -84,9 +87,9 @@ def main():
         data_rows.append(row)
     labor_market_sheets = [[header_row] + data_rows]
 
-    employment_rate_sheets = [last_n_months_sheet(cur, *EMPLOYMENT_RATE_SERIES)]
-    unemployment_rate_sheets = [last_n_months_sheet(cur, *UNEMPLOYMENT_RATE_SERIES)]
-    labor_participation_rate_sheets = [last_n_months_sheet(cur, *LABOR_PARTICIPATION_RATE_SERIES)]
+    employment_rate_sheets = [rate_trend_sheet(cur, *EMPLOYMENT_RATE_SERIES)]
+    unemployment_rate_sheets = [rate_trend_sheet(cur, *UNEMPLOYMENT_RATE_SERIES)]
+    labor_participation_rate_sheets = [rate_trend_sheet(cur, *LABOR_PARTICIPATION_RATE_SERIES)]
 
     conn.close()
 
